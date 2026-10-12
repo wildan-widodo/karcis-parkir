@@ -118,6 +118,8 @@
             overflow: hidden;
             border: 2px solid var(--gold-primary);
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         /* Bingkai Aksen Sudut Mewah */
@@ -257,14 +259,15 @@
     <div class="control-panel">
         <div class="control-group">
             <label for="divisionSelect">Pilih Divisi Toko:</label>
-            <select id="divisionSelect" onchange="updateContent()">
+            <select id="divisionSelect" onchange="generateCards()">
                 <option value="AWW FASHION">AWW Fashion</option>
                 <option value="AWW ATK">AWW ATK</option>
             </select>
         </div>
         <div class="control-group">
             <label for="totalCards">Jumlah Kartu Dicetak:</label>
-            <input type="number" id="totalCards" value="10" min="1" max="50" onchange="generateCards()">
+            <!-- Menggunakan oninput agar langsung merespon saat angka diketik/diubah -->
+            <input type="number" id="totalCards" value="10" min="1" max="200" oninput="generateCards()">
         </div>
         <button class="btn-print" onclick="window.print()">Cetak Kartu (A4)</button>
     </div>
@@ -277,7 +280,15 @@
     <script>
         function generateCards() {
             const container = document.getElementById('cardContainer');
-            const total = parseInt(document.getElementById('totalCards')) || 10;
+            let total = parseInt(document.getElementById('totalCards').value);
+            
+            // Validasi pengaman jika input kosong atau bernilai negatif/nol
+            if (isNaN(total) || total < 1) {
+                total = 1;
+            } else if (total > 200) {
+                total = 200; // Batas maksimal untuk mencegah overload browser
+            }
+
             const division = document.getElementById('divisionSelect').value;
             
             let htmlContent = '';
@@ -304,10 +315,6 @@
                 `;
             }
             container.innerHTML = htmlContent;
-        }
-
-        function updateContent() {
-            generateCards();
         }
 
         // Generate awal saat halaman dimuat
