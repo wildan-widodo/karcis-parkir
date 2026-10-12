@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Kartu Parkir AWW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-dark: #0f172a;
+            --navy-card: #1e293b;
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa7c11;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            padding: 20px;
+        }
+
+        /* Panel Kontrol untuk Pengguna */
+        .control-panel {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--navy-dark);
+        }
+
+        .control-group select, .control-group input {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .control-group select:focus, .control-group input:focus {
+            border-color: var(--gold-primary);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+            transition: transform 0.1s, opacity 0.2s;
+            align-self: flex-end;
+        }
+
+        .btn-print:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* Area Lembar Kerja A4 */
+        .page-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 10mm;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: max-content;
+            gap: 8mm;
+        }
+
+        /* Desain Kartu Parkir */
+        .parking-card {
+            background-color: var(--navy-card);
+            color: #ffffff;
+            width: 92mm;
+            height: 55mm;
+            border-radius: 12px;
+            padding: 14px 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border: 2px solid var(--gold-primary);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Bingkai Aksen Sudut Mewah */
+        .parking-card::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 1px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Header Kartu */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 8px;
+            z-index: 1;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy-dark);
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .brand-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--gold-light);
+            font-weight: 700;
+        }
+
+        .parking-badge {
+            font-size: 10px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-light);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Bagian Tengah (Nomor Seri) */
+        .card-body {
+            text-align: center;
+            z-index: 1;
+            margin: auto 0;
+        }
+
+        .card-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+
+        .card-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Footer Kartu */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            padding-top: 6px;
+            font-size: 9px;
+            color: #94a3b8;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-note {
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        /* Pengaturan Cetak (Print Stylesheet) */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .control-panel {
+                display: none !important;
+            }
+
+            .page-container {
+                box-shadow: none;
+                padding: 0;
+                width: 100%;
+                margin: 0;
+            }
+
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Panel Kontrol Pengaturan Kartu -->
+    <div class="control-panel">
+        <div class="control-group">
+            <label for="divisionSelect">Pilih Divisi Toko:</label>
+            <select id="divisionSelect" onchange="updateContent()">
+                <option value="AWW FASHION">AWW Fashion</option>
+                <option value="AWW ATK">AWW ATK</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="totalCards">Jumlah Kartu Dicetak:</label>
+            <input type="number" id="totalCards" value="10" min="1" max="50" onchange="generateCards()">
+        </div>
+        <button class="btn-print" onclick="window.print()">Cetak Kartu (A4)</button>
+    </div>
+
+    <!-- Halaman Wadah Kartu Parkir (Ukuran A4) -->
+    <div class="page-container" id="cardContainer">
+        <!-- Kartu akan digenerate otomatis lewat script di bawah -->
+    </div>
+
+    <script>
+        function generateCards() {
+            const container = document.getElementById('cardContainer');
+            const total = parseInt(document.getElementById('totalCards')) || 10;
+            const division = document.getElementById('divisionSelect').value;
+            
+            let htmlContent = '';
+            for (let i = 1; i <= total; i++) {
+                let formattedNum = String(i).padStart(3, '0');
+                htmlContent += `
+                    <div class="parking-card">
+                        <div class="card-header">
+                            <div class="brand-section">
+                                <div class="brand-logo">A</div>
+                                <div class="brand-title">${division}</div>
+                            </div>
+                            <div class="parking-badge">Parkir Resmi</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-label">Nomor Kartu</div>
+                            <div class="card-number">${formattedNum}</div>
+                        </div>
+                        <div class="card-footer">
+                            <span>Simpan Kartu Ini</span>
+                            <span class="footer-note">Harap Dibawa Saat Keluar</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = htmlContent;
+        }
+
+        function updateContent() {
+            generateCards();
+        }
+
+        // Generate awal saat halaman dimuat
+        window.onload = generateCards;
+    </script>
+</body>
+</html>
